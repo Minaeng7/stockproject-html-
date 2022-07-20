@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template
 from werkzeug.utils import redirect
-import FinanceDataReader as fdr
-import pandas as pd
+from stock.modules import kospi_nasdaq as kn
+
 bp = Blueprint('stock', __name__, url_prefix='/')
 
 
@@ -12,32 +12,13 @@ bp = Blueprint('stock', __name__, url_prefix='/')
 @bp.route('/kospi_nasdaq')
 def ko_na(): # KOSPI & NASDAQ Category
 
-    # 나스닥
-    IXIC = fdr.DataReader('IXIC', '2016-01-04', '2021-12-31', data_source='close')
+    df = kn.kospiandnasdaq()
+    labels = df.index
+    values_n = df["NASDAQ"]
+    values_k = df["KOSPI"]
+    print(values_k)
 
-    IXIC.dropna(axis=0)
-
-    # 코스피
-    ks11 = fdr.DataReader('ks11', '2016-01-04', '2021-12-31', data_source='close')
-
-    ks11.dropna(axis=0)
-
-    stock_list = [
-        ["NASDAQ", "IXIC"],
-        ["KOSPI", "ks11"],
-    ]
-
-    df_list = [fdr.DataReader(code, '2016-01-04', '2021-12-31')['Close'] for name, code in stock_list]
-
-    df = pd.concat(df_list, axis=1)
-    df.columns = [name for name, code in stock_list]
-
-    df.index = df.index.strftime('%Y/%m/%d')
-    df = df.fillna(method='ffill')
-
-    print(df)
-
-    return render_template('kospi_nasdaq.html', df=df)
+    return render_template('kospi_nasdaq.html', df=df, labels=labels, values_n=values_n, values_k=values_k)
 
 
 @bp.route('/stocks')
