@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from werkzeug.utils import redirect
+from stock.modules import kospi_nasdaq as kn
 
 bp = Blueprint('stock', __name__, url_prefix='/')
 
@@ -10,6 +10,7 @@ bp = Blueprint('stock', __name__, url_prefix='/')
 
 @bp.route('/kospi_nasdaq')
 def ko_na(): # KOSPI & NASDAQ Category
+    kn.kospiandnasdaq()
     return render_template('kospi_nasdaq.html')
 
 
