@@ -1,6 +1,11 @@
-from flask import Blueprint, render_template
+import matplotlib.pyplot as plt
+import pandas as pd
+from flask import Blueprint, render_template, send_file
 from werkzeug.utils import redirect
 from stock.modules import kospi_nasdaq as kn
+from io import BytesIO
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+plt.style.use('ggplot')
 
 bp = Blueprint('stock', __name__, url_prefix='/')
 
@@ -12,13 +17,27 @@ bp = Blueprint('stock', __name__, url_prefix='/')
 @bp.route('/kospi_nasdaq')
 def ko_na(): # KOSPI & NASDAQ Category
 
-    df = kn.kospiandnasdaq()
-    labels = df.index
-    values_n = df["NASDAQ"]
-    values_k = df["KOSPI"]
-    print(values_k)
+    # df = kn.kospiandnasdaq()
+    df = pd.read_csv("C:\ACORN\stockproject-html-\stock\modules\kospi_nasdaq.csv", index_col=0)
+    print(df)
 
-    return render_template('kospi_nasdaq.html', df=df, labels=labels, values_n=values_n, values_k=values_k)
+    # fig, ax = plt.subplots()
+    # date = df.columns
+    # kospi = df["KOSPI"]
+    # nasdaq = df["NASDAQ"]
+    # plt.plot(date, kospi, color="blue")
+    # plt.plot(date, nasdaq, color="red")
+    # plt.xlabel('Date')
+    # plt.ylabel('Kospi&Nasdaq')
+    # plt.title('')
+    # canvas = FigureCanvas(fig)
+    # img = BytesIO()
+    # fig.savefig(img)
+    # img.seek(0)
+
+
+    # return render_template('kospi_nasdaq.html'), send_file(img, mimetype='image/png')
+    return render_template('kospi_nasdaq.html', df=df)
 
 
 @bp.route('/stocks')
