@@ -1,7 +1,7 @@
 import pandas as pd
 import FinanceDataReader as fdr
 
-def kospiandnasdaq ():
+def kospi_nasdaq ():
     # 나스닥
     IXIC = fdr.DataReader('IXIC', '2016-01-04', '2021-12-31', data_source='close')
 
@@ -25,4 +25,5 @@ def kospiandnasdaq ():
     df.index = df.index.strftime('%Y/%m/%d')
     df = df.fillna(method = 'ffill')
 
+    print(df)
     return df
