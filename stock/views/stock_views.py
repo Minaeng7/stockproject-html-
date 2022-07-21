@@ -1,44 +1,42 @@
-import matplotlib.pyplot as plt
+import json
+import plotly.utils
+import matplotlib
+matplotlib.use('Agg')
 import pandas as pd
-from flask import Blueprint, render_template, send_file
-from werkzeug.utils import redirect
+from flask import Blueprint, render_template, send_file, make_response, url_for, Response
 from stock.modules import kospi_nasdaq as kn
-from io import BytesIO
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-plt.style.use('ggplot')
+import plotly
+import plotly.graph_objs as go
 
 bp = Blueprint('stock', __name__, url_prefix='/')
 
-
-# 이 stock_views.py 파일이 실제 FinanceDataReader에서 데이터를 가져오고 전처리 후 각 html파일로 데이터를 보내주는 역할을 할겁니다.
-# 여기 코드가 길어질 가능성이 있기 때문에 추가로 function모듈을 만들고 그 모듈안에서 하나씩 함수를 호출해서 사용하는 방법이 좋을듯.
-
+# kospi_nasdaq
+df = kn.kospiandnasdaq()
 
 @bp.route('/kospi_nasdaq')
 def ko_na(): # KOSPI & NASDAQ Category
 
-    # df = kn.kospiandnasdaq()
-    df = pd.read_csv("C:\ACORN\stockproject-html-\stock\modules\kospi_nasdaq.csv", index_col=0)
-    print(df)
+    # 코스피, 나스닥 그래프
+    bar = knplot()
+    return render_template('kospi_nasdaq.html', plot=bar)
 
-    # fig, ax = plt.subplots()
-    # date = df.columns
-    # kospi = df["KOSPI"]
-    # nasdaq = df["NASDAQ"]
-    # plt.plot(date, kospi, color="blue")
-    # plt.plot(date, nasdaq, color="red")
-    # plt.xlabel('Date')
-    # plt.ylabel('Kospi&Nasdaq')
-    # plt.title('')
-    # canvas = FigureCanvas(fig)
-    # img = BytesIO()
-    # fig.savefig(img)
-    # img.seek(0)
+# 그래프
+def knplot():
 
+    data = [
+        go.Scatter(x=df.index, y=df["KOSPI"]),
+        go.Scatter(x=df.index, y=df["NASDAQ"], yaxis='y2')
+    ]
 
-    # return render_template('kospi_nasdaq.html'), send_file(img, mimetype='image/png')
-    return render_template('kospi_nasdaq.html', df=df)
+    y2 = go.YAxis(overlaying='y', side='right')
+    layout = go.Layout(yaxis2=y2)
+    fig = go.Figure(data=data, layout=layout)
+    fig.update_layout(go.Layout(paper_bgcolor='#30254D',
+                                legend={'font':{'color':'#000000'}},
+                                font={'color':'white'}))
 
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    return graphJSON
 
 @bp.route('/stocks')
 def stocks(): # STOCK OF KOSPI Category
